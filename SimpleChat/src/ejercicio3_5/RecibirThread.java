@@ -1,40 +1,32 @@
 package ejercicio3_5;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.DataInputStream;
 import java.net.Socket;
 
 public class RecibirThread extends Thread {
-    private Socket socket;
+	private Socket socket;
 
-    public RecibirThread(Socket socket) {
-        this.socket = socket;
-    }
+	public RecibirThread(Socket socket) {
+		this.socket = socket;
+	}
 
-    public void run() {
-        try {
-            boolean encendido = true;
-            DataInputStream entrada = socket.getInputStream();
-            String mensaje;
-
-            while (encendido) {
-                mensaje = entrada.read() + "";
-                if (mensaje == null || mensaje.equalsIgnoreCase("salir")) {
-                    encendido = false;
-                    if (!socket.isClosed()) {
-                        socket.close();
-                        System.out.println("se acabo la fiesta" );
-                    }
-                    break;
-                } else {
-                    System.out.println("\033[0;32m" + mensaje );
-                }
-            }
-        } catch (Exception e) {
-            if (!socket.isClosed()) {
-                e.printStackTrace();
-            }
-        }
-    }
+	public void run() {
+		try {
+			DataInputStream entrada = new DataInputStream(socket.getInputStream());
+			String mensaje;
+			while (true) {
+				mensaje = entrada.readUTF();
+				if (mensaje.equalsIgnoreCase("salir")) {
+					System.out.println("El otro usuario ha finalizado la conexión.");
+					socket.close();
+					break;
+				}
+				System.out.println("\033[0;30m " + mensaje);
+			}
+		} catch (java.net.SocketException e) {
+			System.out.println("Conexión cerrada.");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }
